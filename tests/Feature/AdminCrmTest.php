@@ -173,4 +173,38 @@ class AdminCrmTest extends TestCase
         $settingsResponse->assertStatus(200);
         $settingsResponse->assertSee('System & Agency Settings');
     }
+
+    public function test_admin_can_schedule_lead_followup(): void
+    {
+        $admin = $this->createAdminUser();
+
+        $lead = Lead::create([
+            'lead_number' => 'LEAD-2026-9999',
+            'name' => 'Vikramaditya Sharma',
+            'email' => 'vikram@example.com',
+            'phone' => '+919876543210',
+            'destination' => 'Goa Beach Holiday',
+            'category' => 'package',
+            'priority' => 'high',
+            'status' => 'new',
+        ]);
+
+        $response = $this->actingAs($admin)->post("/admin/leads/{$lead->id}/followup", [
+            'followup_date' => now()->addDays(2)->format('Y-m-d\TH:i'),
+            'remarks' => 'Call client to confirm hotel booking and flight tickets',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+        $this->assertDatabaseHas('lead_followups', [
+            'lead_id' => $lead->id,
+            'user_id' => $admin->id,
+            'remarks' => 'Call client to confirm hotel booking and flight tickets',
+        ]);
+        $this->assertDatabaseHas('lead_activities', [
+            'lead_id' => $lead->id,
+            'type' => 'call',
+            'summary' => 'Follow-up Scheduled',
+        ]);
+    }
 }
