@@ -108,6 +108,11 @@
                     </div>
 
                     <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Quote Validity Date</label>
+                        <input type="date" name="valid_until" value="{{ old('valid_until', date('Y-m-d', strtotime('+14 days'))) }}" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs">
+                    </div>
+
+                    <div>
                         <label class="block font-semibold text-slate-700 mb-1">Adults (12+ Yrs) *</label>
                         <input type="number" name="adults" min="1" required value="{{ old('adults', $selectedLead?->adults ?? 2) }}" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs">
                     </div>

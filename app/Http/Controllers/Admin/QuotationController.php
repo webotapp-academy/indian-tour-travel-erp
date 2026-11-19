@@ -44,17 +44,48 @@ class QuotationController extends Controller
 
     public function create(Request $request): View
     {
+        $selectedLead = $request->filled('lead_id') ? Lead::find($request->lead_id) : null;
+
+        if ($selectedLead && ! $selectedLead->customer_id && (! empty($selectedLead->email) || ! empty($selectedLead->phone))) {
+            $customer = Customer::firstOrCreate(
+                ['email' => $selectedLead->email ?: ($selectedLead->phone.'@guest.bharattravel.com')],
+                [
+                    'customer_code' => 'CUST-'.date('Y').'-'.rand(1000, 9999),
+                    'name' => $selectedLead->name,
+                    'phone' => $selectedLead->phone,
+                    'status' => 'active',
+                ]
+            );
+            $selectedLead->update(['customer_id' => $customer->id]);
+            $selectedLead->refresh();
+        }
+
         $customers = Customer::orderBy('name')->get();
         $packages = TourPackage::where('is_active', true)->where('status', 'published')->get();
         $leads = Lead::whereIn('status', ['new', 'contacted', 'interested', 'follow_up'])->get();
-
-        $selectedLead = $request->filled('lead_id') ? Lead::find($request->lead_id) : null;
 
         return view('admin.quotations.create', compact('customers', 'packages', 'leads', 'selectedLead'));
     }
 
     public function store(Request $request): RedirectResponse
     {
+        if (! $request->filled('customer_id') && $request->filled('lead_id')) {
+            $lead = Lead::find($request->lead_id);
+            if ($lead) {
+                $customer = Customer::firstOrCreate(
+                    ['email' => $lead->email ?: ($lead->phone.'@guest.bharattravel.com')],
+                    [
+                        'customer_code' => 'CUST-'.date('Y').'-'.rand(1000, 9999),
+                        'name' => $lead->name,
+                        'phone' => $lead->phone,
+                        'status' => 'active',
+                    ]
+                );
+                $request->merge(['customer_id' => $customer->id]);
+                $lead->update(['customer_id' => $customer->id]);
+            }
+        }
+
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'lead_id' => 'nullable|exists:leads,id',

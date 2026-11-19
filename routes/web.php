@@ -173,7 +173,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/quotations', [QuotationController::class, 'store'])->name('quotations.store');
     Route::get('/quotations/{id}', [QuotationController::class, 'show'])->name('quotations.show');
     Route::get('/quotations/{id}/pdf', [QuotationController::class, 'downloadPdf'])->name('quotations.pdf.download');
-    Route::post('/quotations/{id}/convert', [QuotationController::class, 'convertToBooking'])->name('quotations.convert.booking');
+    Route::post('/quotations/{id}/convert', [QuotationController::class, 'convertToBooking'])->name('quotations.convert');
+    Route::post('/quotations/{id}/convert-booking', [QuotationController::class, 'convertToBooking'])->name('quotations.convert.booking');
 
     // Visa & Passport Operations
     Route::get('/visa', [VisaPassportController::class, 'visaIndex'])->name('visa.index');

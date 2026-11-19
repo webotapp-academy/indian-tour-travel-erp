@@ -207,4 +207,97 @@ class AdminCrmTest extends TestCase
             'summary' => 'Follow-up Scheduled',
         ]);
     }
+
+    public function test_admin_can_view_quotation_detail_and_convert_to_booking(): void
+    {
+        $admin = $this->createAdminUser();
+
+        $customer = Customer::create([
+            'customer_code' => 'CUST-2026-1111',
+            'name' => 'Aarav Patel',
+            'email' => 'aarav@example.com',
+            'phone' => '+919812345678',
+            'status' => 'active',
+        ]);
+
+        $quotation = Quotation::create([
+            'quotation_number' => 'QT-2026-TEST01',
+            'customer_id' => $customer->id,
+            'created_by' => $admin->id,
+            'title' => 'Kashmir Luxury Holiday',
+            'destination' => 'Srinagar, Gulmarg',
+            'adults' => 2,
+            'children' => 0,
+            'subtotal' => 60000,
+            'tax_rate' => 5,
+            'tax_amount' => 3000,
+            'total_amount' => 63000,
+            'supplier_cost' => 42000,
+            'profit_margin' => 18000,
+            'valid_until' => now()->addDays(14)->toDateString(),
+            'status' => 'draft',
+        ]);
+
+        // Test GET /admin/quotations/{id}
+        $showResponse = $this->actingAs($admin)->get("/admin/quotations/{$quotation->id}");
+        $showResponse->assertStatus(200);
+        $showResponse->assertSee('QT-2026-TEST01');
+        $showResponse->assertSee('Kashmir Luxury Holiday');
+
+        // Test POST /admin/quotations/{id}/convert
+        $convertResponse = $this->actingAs($admin)->post("/admin/quotations/{$quotation->id}/convert");
+        $convertResponse->assertRedirect();
+        $this->assertDatabaseHas('quotations', [
+            'id' => $quotation->id,
+            'status' => 'converted',
+        ]);
+        $this->assertDatabaseHas('bookings', [
+            'customer_id' => $customer->id,
+            'total_amount' => 63000,
+            'booking_status' => 'confirmed',
+        ]);
+    }
+
+    public function test_admin_can_create_quotation_from_lead_without_prior_customer(): void
+    {
+        $admin = $this->createAdminUser();
+
+        $lead = Lead::create([
+            'lead_number' => 'LEAD-2026-8888',
+            'name' => 'Paban Bhuyan',
+            'email' => 'paban@indiawebdesigns.in',
+            'phone' => '+917002484119',
+            'destination' => 'Dubai Luxury Shopping Festival',
+            'category' => 'package',
+            'priority' => 'high',
+            'status' => 'new',
+        ]);
+
+        // Test GET create page with lead_id
+        $createResponse = $this->actingAs($admin)->get("/admin/quotations/create?lead_id={$lead->id}");
+        $createResponse->assertStatus(200);
+        $createResponse->assertSee('Paban Bhuyan');
+
+        // Test POST store creating quotation and auto-linking customer
+        $storeResponse = $this->actingAs($admin)->post('/admin/quotations', [
+            'lead_id' => $lead->id,
+            'title' => 'Dubai 5D4N Deluxe Package Proposal',
+            'destination' => 'Dubai, UAE',
+            'adults' => 2,
+            'children' => 0,
+            'subtotal' => 95000,
+            'tax_rate' => 5,
+            'supplier_cost' => 65000,
+        ]);
+
+        $storeResponse->assertRedirect();
+        $this->assertDatabaseHas('quotations', [
+            'lead_id' => $lead->id,
+            'title' => 'Dubai 5D4N Deluxe Package Proposal',
+            'subtotal' => 95000,
+        ]);
+        $this->assertDatabaseHas('customers', [
+            'email' => 'paban@indiawebdesigns.in',
+        ]);
+    }
 }
