@@ -195,4 +195,13 @@ class PackageManagementController extends Controller
 
         return back()->with('success', 'Departure schedule added.');
     }
+
+    public function destroy(int $id): RedirectResponse
+    {
+        $package = TourPackage::findOrFail($id);
+        $title = $package->title;
+        $package->delete();
+
+        return redirect()->route('admin.packages.index')->with('success', "Package '{$title}' has been deleted successfully.");
+    }
 }

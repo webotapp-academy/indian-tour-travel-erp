@@ -2,10 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Models\Country;
 use App\Models\Customer;
+use App\Models\Destination;
 use App\Models\Lead;
 use App\Models\Quotation;
 use App\Models\Role;
+use App\Models\TourPackage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -298,6 +301,43 @@ class AdminCrmTest extends TestCase
         ]);
         $this->assertDatabaseHas('customers', [
             'email' => 'paban@indiawebdesigns.in',
+        ]);
+    }
+
+    public function test_admin_can_delete_package(): void
+    {
+        $admin = $this->createAdminUser();
+
+        $country = Country::firstOrCreate(['code' => 'IN'], ['name' => 'India', 'phone_code' => '+91', 'is_active' => true]);
+
+        $destination = Destination::create([
+            'country_id' => $country->id,
+            'name' => 'Goa Test',
+            'slug' => 'goa-test',
+            'type' => 'domestic',
+            'is_active' => true,
+        ]);
+
+        $package = TourPackage::create([
+            'destination_id' => $destination->id,
+            'title' => 'Temporary Promo Package',
+            'slug' => 'temporary-promo-package',
+            'package_code' => 'PKG-TEMP-01',
+            'duration_days' => 3,
+            'duration_nights' => 2,
+            'starting_price' => 9999,
+            'adult_price' => 9999,
+            'child_price' => 4999,
+            'infant_price' => 1999,
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($admin)->delete("/admin/packages/{$package->id}");
+
+        $response->assertRedirect('/admin/packages');
+        $response->assertSessionHas('success');
+        $this->assertSoftDeleted('packages', [
+            'id' => $package->id,
         ]);
     }
 }

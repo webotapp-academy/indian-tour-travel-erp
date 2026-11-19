@@ -155,6 +155,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/packages/{id}', [PackageManagementController::class, 'show'])->name('packages.show');
     Route::get('/packages/{id}/edit', [PackageManagementController::class, 'edit'])->name('packages.edit');
     Route::put('/packages/{id}', [PackageManagementController::class, 'update'])->name('packages.update');
+    Route::delete('/packages/{id}', [PackageManagementController::class, 'destroy'])->name('packages.destroy');
     Route::post('/packages/{id}/itinerary', [PackageManagementController::class, 'addItinerary'])->name('packages.itineraries.store');
     Route::post('/packages/{id}/departure', [PackageManagementController::class, 'addDeparture'])->name('packages.departures.store');
 

@@ -99,13 +99,22 @@
                                     {{ ucfirst($pkg->status) }}
                                 </span>
                             </td>
-                            <td class="py-4 px-6 text-right space-x-1">
-                                <a href="{{ route('admin.packages.show', $pkg->id) }}" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-lg transition inline-block">
-                                    Console
-                                </a>
-                                <a href="{{ route('admin.packages.edit', $pkg->id) }}" class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold rounded-lg transition inline-block">
-                                    Edit
-                                </a>
+                            <td class="py-4 px-6 text-right whitespace-nowrap">
+                                <div class="inline-flex items-center gap-1.5 justify-end">
+                                    <a href="{{ route('admin.packages.show', $pkg->id) }}" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-lg transition inline-block">
+                                        Console
+                                    </a>
+                                    <a href="{{ route('admin.packages.edit', $pkg->id) }}" class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold rounded-lg transition inline-block">
+                                        Edit
+                                    </a>
+                                    <form action="{{ route('admin.packages.destroy', $pkg->id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete \'{{ addslashes($pkg->title) }}\'?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-lg transition inline-flex items-center gap-1" title="Delete Package">
+                                            <i data-lucide="trash-2" class="w-3 h-3"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty

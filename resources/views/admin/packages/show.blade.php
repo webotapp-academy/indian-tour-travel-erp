@@ -30,6 +30,13 @@
             <a href="{{ route('admin.packages.edit', $package->id) }}" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5">
                 <i data-lucide="edit" class="w-3.5 h-3.5"></i> Edit Package
             </a>
+            <form action="{{ route('admin.packages.destroy', $package->id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete \'{{ addslashes($package->title) }}\'?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete
+                </button>
+            </form>
         </div>
     </div>
 
