@@ -154,4 +154,54 @@ class PublicPortalTest extends TestCase
             'email' => 'subscriber@test.com',
         ]);
     }
+
+    public function test_package_booking_can_be_submitted_successfully(): void
+    {
+        $country = $this->getCountry();
+
+        $destination = Destination::create([
+            'country_id' => $country->id,
+            'name' => 'Goa Beach',
+            'slug' => 'goa-beach',
+            'type' => 'domestic',
+            'is_active' => true,
+        ]);
+
+        $package = TourPackage::create([
+            'destination_id' => $destination->id,
+            'title' => 'Goa Luxury Beach Escape',
+            'slug' => 'goa-luxury-beach-escape-yacht-candolim',
+            'package_code' => 'PKG-GOA-01',
+            'duration_days' => 4,
+            'duration_nights' => 3,
+            'starting_price' => 19999,
+            'adult_price' => 19999,
+            'child_price' => 9999,
+            'infant_price' => 2999,
+            'is_active' => true,
+        ]);
+
+        $response = $this->post("/packages/{$package->slug}/book", [
+            'departure_date' => now()->addDays(14)->toDateString(),
+            'adults' => 2,
+            'children' => 0,
+            'infants' => 0,
+            'customer_name' => 'Paban Jyoti Bhuyan',
+            'customer_email' => 'zzubizubi@gmail.com',
+            'customer_phone' => '+917002484119',
+            'advance_payment_method' => 'pay_later',
+            'lead_passenger_name' => 'Paban Jyoti Bhuyan',
+            'lead_passenger_gender' => 'male',
+            'lead_passenger_age' => 30,
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('customers', [
+            'email' => 'zzubizubi@gmail.com',
+        ]);
+        $this->assertDatabaseHas('bookings', [
+            'package_id' => $package->id,
+            'adults' => 2,
+        ]);
+    }
 }
