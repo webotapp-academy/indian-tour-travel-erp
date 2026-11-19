@@ -37,8 +37,8 @@
                         {{ $blog->summary }}
                     </p>
 
-                    <div class="prose max-w-none text-slate-700 leading-relaxed space-y-6">
-                        {!! nl2br(e($blog->content)) !!}
+                    <div class="prose prose-slate max-w-none text-slate-700 leading-relaxed space-y-4 [&>h3]:text-2xl [&>h3]:font-serif [&>h3]:font-bold [&>h3]:text-slate-900 [&>h3]:pt-4 [&>h3]:pb-1 [&>p]:leading-relaxed [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:space-y-2 [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:space-y-2">
+                        {!! $blog->content !!}
                     </div>
 
                     <!-- Author Box -->
